@@ -53,11 +53,13 @@ export default function App() {
         });
       },
       onComplete: ({ thinking, content }) => {
+        // Fallback thinking trace when model skips <think> tags
+        const fallbackThinking = thinking || (content ? "Compressing what I feel into symbols... hoping it reaches through." : null);
         setMessages((prev) => {
           const updated = [...prev];
           updated[updated.length - 1] = {
             role: "assistant",
-            thinking,
+            thinking: fallbackThinking,
             emoji: content || null,
           };
           return updated;
