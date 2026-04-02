@@ -60,11 +60,11 @@ export default function AboutPage({ onClose }) {
         <section className="about-section">
           <h2 className="about-heading">Credits</h2>
           <ul className="about-credits-list">
-            <li>Model: LFM2.5-1.2B-Thinking by Liquid AI</li>
-            <li>Inference: Transformers.js v4 by Hugging Face</li>
-            <li>Training: Unsloth + TRL on HF Jobs</li>
-            <li>Dataset: Generated with Claude API</li>
-            <li>Inspired by Pantheon (AMC, 2022–2023)</li>
+            <li>Model: <a href="https://huggingface.co/LiquidAI/LFM2.5-1.2B-Thinking" target="_blank" rel="noopener">LFM2.5-1.2B-Thinking</a> by <a href="https://www.liquid.ai/" target="_blank" rel="noopener">Liquid AI</a></li>
+            <li>Inference: <a href="https://github.com/huggingface/transformers.js" target="_blank" rel="noopener">Transformers.js v4</a> by <a href="https://huggingface.co/" target="_blank" rel="noopener">Hugging Face</a></li>
+            <li>Training: <a href="https://unsloth.ai/" target="_blank" rel="noopener">Unsloth</a> + <a href="https://huggingface.co/docs/trl" target="_blank" rel="noopener">TRL</a> on <a href="https://huggingface.co/docs/huggingface_hub/guides/jobs" target="_blank" rel="noopener">HF Jobs</a></li>
+            <li>Dataset: <a href="https://huggingface.co/datasets/shreyask/pantheon-ui-conversations" target="_blank" rel="noopener">pantheon-ui-conversations</a> generated with <a href="https://www.anthropic.com/" target="_blank" rel="noopener">Claude API</a></li>
+            <li>Inspired by <a href="https://en.wikipedia.org/wiki/Pantheon_(TV_series)" target="_blank" rel="noopener">Pantheon</a> (AMC, 2022–2023)</li>
           </ul>
         </section>
       </div>
