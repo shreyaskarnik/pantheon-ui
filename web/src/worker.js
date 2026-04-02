@@ -39,7 +39,6 @@ async function generate(messages) {
     skip_special_tokens: false,
     callback_function: (text) => {
       if (text === "<|im_end|>") return;
-      console.log("[worker] token:", JSON.stringify(text), "| reasoning so far:", parser.reasoning.length, "| content so far:", parser.content.length);
       parser.push(text);
       self.postMessage({ type: "update", thinking: parser.reasoning, content: parser.content });
     },

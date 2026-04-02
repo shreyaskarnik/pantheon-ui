@@ -1,5 +1,4 @@
 export function parseResponse(text) {
-  console.log("[pantheon] raw output:", text);
 
   // Check for complete <think>...</think>
   const completeThink = text.match(/<think>([\s\S]*?)<\/think>/);
