@@ -267,6 +267,8 @@ body {
   line-height: 1.6;
   padding: 0.25rem 0;
   letter-spacing: 0.05em;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 
 .emoji-char {

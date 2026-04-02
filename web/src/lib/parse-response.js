@@ -1,18 +1,29 @@
 export function parseResponse(text) {
   console.log("[pantheon] raw output:", text);
 
-  const thinkMatch = text.match(/<think>([\s\S]*?)<\/think>/);
-  const thinking = thinkMatch ? thinkMatch[1].trim() : null;
+  // Check for complete <think>...</think>
+  const completeThink = text.match(/<think>([\s\S]*?)<\/think>/);
 
-  const afterThink = thinkMatch
-    ? text.slice(text.indexOf("</think>") + 8).trim()
-    : text.trim();
+  let thinking = null;
+  let afterThink = "";
 
-  // Try to extract emoji-only content
-  const emojiOnly = afterThink.replace(/[a-zA-Z0-9.,!?;:'"()\-<>\/\[\]{}]/g, "").trim();
+  if (completeThink) {
+    thinking = completeThink[1].trim();
+    afterThink = text.slice(text.indexOf("</think>") + 8).trim();
+  } else {
+    // Partial <think> — still streaming thinking content
+    const partialThink = text.match(/<think>([\s\S]*)/);
+    if (partialThink) {
+      thinking = partialThink[1].trim();
+      afterThink = ""; // no emoji yet
+    } else {
+      afterThink = text.trim();
+    }
+  }
 
-  // If stripping leaves nothing useful, show the raw text (base model fallback)
-  const emoji = emojiOnly.length > 0 ? emojiOnly : afterThink;
+  // Extract emoji-only content from after </think>
+  const emojiOnly = afterThink.replace(/[a-zA-Z0-9.,!?;:'"()\-<>\/\[\]{}@#$%^&*_+=~`\\|]/g, "").trim();
+  const emoji = emojiOnly.length > 0 ? emojiOnly : "";
 
   return { thinking: thinking || null, emoji, raw: text };
 }
