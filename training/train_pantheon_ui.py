@@ -66,7 +66,7 @@ training_args = SFTConfig(
     per_device_train_batch_size=4,
     gradient_accumulation_steps=4,
     # Schedule
-    num_train_epochs=3,
+    num_train_epochs=6,
     learning_rate=2e-4,
     warmup_steps=50,
     # Evaluation
@@ -78,7 +78,7 @@ training_args = SFTConfig(
     hub_strategy="every_save",
     # Logging / tracking
     report_to="trackio",
-    run_name="lfm25-emoji-sft-v1",
+    run_name="lfm25-emoji-sft-v3-6ep",
     # Trackio project label (passed via environment or SFTConfig extra kwargs)
     # trackio reads HF_PROJECT / TRACKIO_PROJECT from env; set it explicitly too
 )
