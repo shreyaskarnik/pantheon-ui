@@ -222,38 +222,63 @@ body {
 /* Thinking trace */
 .thinking-trace {
   margin-bottom: 0.5rem;
-  padding: 0.5rem 0.75rem;
   background: var(--thinking-glow);
   border-left: 2px solid var(--thinking-color);
   border-radius: 2px;
-  transition: opacity 0.8s ease-out;
+  overflow: hidden;
 }
 
-.thinking-fade {
-  opacity: 0.15;
+.thinking-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.4rem 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--thinking-color);
+  letter-spacing: 0.08em;
+  text-align: left;
+}
+
+.thinking-header:hover {
+  background: rgba(140, 180, 140, 0.05);
+}
+
+.thinking-icon {
+  font-size: 0.85rem;
 }
 
 .thinking-label {
-  display: block;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.55rem;
+  font-size: 0.65rem;
   color: var(--thinking-color);
-  letter-spacing: 0.2em;
-  margin-bottom: 0.3rem;
-  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.thinking-chevron {
+  margin-left: auto;
+  font-size: 0.8rem;
+  opacity: 0.6;
 }
 
 .thinking-text {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--thinking-color);
-  line-height: 1.6;
+  line-height: 1.7;
   font-weight: 300;
+  padding: 0 0.75rem 0.6rem;
+  opacity: 0.85;
 }
 
 .thinking-cursor {
   animation: blink 0.8s step-end infinite;
   color: var(--accent);
+  margin-left: 0.3rem;
 }
 
 @keyframes blink {

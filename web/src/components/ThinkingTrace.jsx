@@ -1,27 +1,28 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function ThinkingTrace({ text, isComplete, showThinking }) {
-  const [fading, setFading] = useState(false);
-
-  // Fade when emoji response arrives
-  useEffect(() => {
-    if (isComplete && text) {
-      const timeout = setTimeout(() => setFading(true), 500);
-      return () => clearTimeout(timeout);
-    } else {
-      setFading(false);
-    }
-  }, [isComplete, text]);
+  const [collapsed, setCollapsed] = useState(false);
 
   if (!text || !showThinking) return null;
 
   return (
-    <div className={`thinking-trace ${fading ? "thinking-fade" : ""}`}>
-      <span className="thinking-label">[NEURAL ACTIVITY]</span>
-      <p className="thinking-text">
-        {text}
+    <div className="thinking-trace">
+      <button
+        className="thinking-header"
+        onClick={() => isComplete && setCollapsed((prev) => !prev)}
+      >
+        <span className="thinking-icon">💭</span>
+        <span className="thinking-label">
+          {isComplete ? "Internal monologue" : "Thinking..."}
+        </span>
+        {isComplete && (
+          <span className="thinking-chevron">{collapsed ? "›" : "⌄"}</span>
+        )}
         {!isComplete && <span className="thinking-cursor">▋</span>}
-      </p>
+      </button>
+      {!collapsed && (
+        <p className="thinking-text">{text}</p>
+      )}
     </div>
   );
 }
