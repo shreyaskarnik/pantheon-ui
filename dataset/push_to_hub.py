@@ -62,6 +62,20 @@ def main():
         private=False,
         commit_message="Update pantheon-ui-conversations dataset",
     )
+
+    # Upload dataset card
+    card_path = Path(__file__).parent / "card" / "README.md"
+    if card_path.exists():
+        api = HfApi()
+        api.upload_file(
+            path_or_fileobj=str(card_path),
+            path_in_repo="README.md",
+            repo_id=HF_REPO_ID,
+            repo_type="dataset",
+            commit_message="Add dataset card",
+        )
+        print("Dataset card uploaded.")
+
     print(f"Done! https://huggingface.co/datasets/{HF_REPO_ID}")
 
 
