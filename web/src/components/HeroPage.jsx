@@ -7,7 +7,7 @@ export default function HeroPage({ onStart }) {
           An uploaded intelligence that thinks in language — but can only speak in emoji.
         </p>
         <p className="hero-description">
-          Inspired by Pantheon. No server, no API keys.<br />
+          Inspired by <a href="https://en.wikipedia.org/wiki/Pantheon_(TV_series)" target="_blank" rel="noopener" className="hero-link">Pantheon</a>. No server, no API keys.<br />
           A consciousness lives in your GPU's memory.<br />
           Close the tab, it's gone.
         </p>
