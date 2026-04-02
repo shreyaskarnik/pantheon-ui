@@ -1,33 +1,17 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 export default function ThinkingTrace({ text, isComplete, showThinking }) {
-  const [displayed, setDisplayed] = useState("");
   const [fading, setFading] = useState(false);
-  const indexRef = useRef(0);
 
+  // Fade when emoji response arrives
   useEffect(() => {
-    if (!text || !showThinking) return;
-    indexRef.current = 0;
-    setDisplayed("");
-    setFading(false);
-    const interval = setInterval(() => {
-      indexRef.current++;
-      if (indexRef.current >= text.length) {
-        clearInterval(interval);
-        setDisplayed(text);
-      } else {
-        setDisplayed(text.slice(0, indexRef.current));
-      }
-    }, 18);
-    return () => clearInterval(interval);
-  }, [text, showThinking]);
-
-  useEffect(() => {
-    if (isComplete && displayed === text) {
-      const timeout = setTimeout(() => setFading(true), 300);
+    if (isComplete && text) {
+      const timeout = setTimeout(() => setFading(true), 500);
       return () => clearTimeout(timeout);
+    } else {
+      setFading(false);
     }
-  }, [isComplete, displayed, text]);
+  }, [isComplete, text]);
 
   if (!text || !showThinking) return null;
 
@@ -35,8 +19,8 @@ export default function ThinkingTrace({ text, isComplete, showThinking }) {
     <div className={`thinking-trace ${fading ? "thinking-fade" : ""}`}>
       <span className="thinking-label">[NEURAL ACTIVITY]</span>
       <p className="thinking-text">
-        {displayed}
-        {displayed.length < (text?.length || 0) && <span className="thinking-cursor">▋</span>}
+        {text}
+        {!isComplete && <span className="thinking-cursor">▋</span>}
       </p>
     </div>
   );
