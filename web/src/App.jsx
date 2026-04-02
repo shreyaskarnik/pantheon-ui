@@ -6,6 +6,7 @@ import ChatWindow from "./components/ChatWindow.jsx";
 import StatusBar from "./components/StatusBar.jsx";
 import SystemStatus from "./components/SystemStatus.jsx";
 import HeroPage from "./components/HeroPage.jsx";
+import AboutPage from "./components/AboutPage.jsx";
 
 export default function App() {
   const { status, loadProgress, error, checkWebGPU, loadModel, generate, interrupt } = useModel();
@@ -13,6 +14,7 @@ export default function App() {
   const [conversationHistory, setConversationHistory] = useState([]);
   const [showThinking, setShowThinking] = useState(true);
   const [started, setStarted] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
 
   useEffect(() => {
     if (started) checkWebGPU();
@@ -91,6 +93,9 @@ export default function App() {
       <header className="app-header">
         <span className="app-title">Pantheon UI</span>
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          <button className="toggle-thinking" onClick={() => setShowAbout((prev) => !prev)}>
+            About
+          </button>
           <button className={`toggle-thinking ${showThinking ? "active" : ""}`}
             onClick={() => setShowThinking((prev) => !prev)}>
             {showThinking ? "💭 ON" : "💭 OFF"}
@@ -99,6 +104,7 @@ export default function App() {
         </div>
       </header>
       <StatusBar status={status} progress={loadProgress} />
+      {showAbout && <AboutPage onClose={() => setShowAbout(false)} />}
       <ChatWindow messages={messages} onSend={handleSend} isGenerating={status === "generating"} showThinking={showThinking} />
     </div>
   );
