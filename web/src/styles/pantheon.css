@@ -147,6 +147,18 @@ body {
   border-color: var(--status-error);
 }
 
+.status-error-detail {
+  margin-top: 0.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--status-error);
+  opacity: 0.7;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
 .status-message {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.7rem;

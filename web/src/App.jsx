@@ -103,7 +103,7 @@ export default function App() {
           <SystemStatus status={status} />
         </div>
       </header>
-      <StatusBar status={status} progress={loadProgress} />
+      <StatusBar status={status} progress={loadProgress} error={error} />
       {showAbout && <AboutPage onClose={() => setShowAbout(false)} />}
       <ChatWindow messages={messages} onSend={handleSend} isGenerating={status === "generating"} showThinking={showThinking} />
     </div>

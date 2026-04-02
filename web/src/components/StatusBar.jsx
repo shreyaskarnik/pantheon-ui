@@ -1,6 +1,6 @@
 import { LOADING_MESSAGES } from "../lib/constants.js";
 
-export default function StatusBar({ status, progress }) {
+export default function StatusBar({ status, progress, error }) {
   if (status === "ready" || status === "idle") return null;
 
   const getMessage = () => {
@@ -28,6 +28,9 @@ export default function StatusBar({ status, progress }) {
         <div className="progress-bar">
           <div className="progress-fill" style={{ width: `${pct}%` }} />
         </div>
+      )}
+      {status === "error" && error && (
+        <pre className="status-error-detail">{error}</pre>
       )}
     </div>
   );

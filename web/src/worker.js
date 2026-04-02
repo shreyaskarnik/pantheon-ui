@@ -1,25 +1,17 @@
 import {
-  AutoTokenizer,
-  AutoModelForCausalLM,
+  pipeline,
   TextStreamer,
   InterruptableStoppingCriteria,
 } from "@huggingface/transformers";
 import { MODEL_ID, GENERATION_CONFIG } from "./lib/constants.js";
 
-let tokenizer = null;
-let model = null;
+let generator = null;
 let stoppingCriteria = null;
 
 async function loadModel() {
   self.postMessage({ type: "status", status: "loading" });
 
-  tokenizer = await AutoTokenizer.from_pretrained(MODEL_ID, {
-    progress_callback: (progress) => {
-      self.postMessage({ type: "progress", progress });
-    },
-  });
-
-  model = await AutoModelForCausalLM.from_pretrained(MODEL_ID, {
+  generator = await pipeline("text-generation", MODEL_ID, {
     dtype: "q4",
     device: "webgpu",
     progress_callback: (progress) => {
@@ -28,35 +20,25 @@ async function loadModel() {
   });
 
   stoppingCriteria = new InterruptableStoppingCriteria();
-
-  // Warmup pass to compile WebGPU shaders
-  self.postMessage({ type: "status", status: "warming_up" });
-  const warmupInput = tokenizer("warmup", { return_tensors: "pt" });
-  await model.generate({ ...warmupInput, max_new_tokens: 1 });
-
   self.postMessage({ type: "status", status: "ready" });
 }
 
 async function generate(messages) {
-  if (!tokenizer || !model) {
+  if (!generator) {
     self.postMessage({ type: "error", error: "Model not loaded" });
     return;
   }
 
   stoppingCriteria.reset();
 
-  const inputs = tokenizer.apply_chat_template(messages, {
-    add_generation_prompt: true,
-    return_dict: true,
-  });
-
   let state = "thinking";
   let fullOutput = "";
 
-  const streamer = new TextStreamer(tokenizer, {
+  const streamer = new TextStreamer(generator.tokenizer, {
     skip_prompt: true,
-    skip_special_tokens: true,
+    skip_special_tokens: false,
     callback_function: (text) => {
+      if (text === "<|im_end|>") return;
       fullOutput += text;
       if (state === "thinking" && fullOutput.includes("</think>")) {
         state = "answering";
@@ -68,15 +50,14 @@ async function generate(messages) {
   self.postMessage({ type: "start" });
 
   try {
-    await model.generate({
-      ...inputs,
+    await generator(messages, {
       ...GENERATION_CONFIG,
       streamer,
       stopping_criteria: stoppingCriteria,
     });
   } catch (e) {
     if (e.message !== "Generation interrupted") {
-      self.postMessage({ type: "error", error: e.message });
+      self.postMessage({ type: "error", error: `${e.message}\n\n${e.stack}` });
       return;
     }
   }
@@ -103,7 +84,7 @@ self.onmessage = async (e) => {
     }
     case "load":
       try { await loadModel(); }
-      catch (e) { self.postMessage({ type: "error", error: e.message }); }
+      catch (e) { self.postMessage({ type: "error", error: `${e.message}\n\n${e.stack}` }); }
       break;
     case "generate":
       await generate(payload.messages);
