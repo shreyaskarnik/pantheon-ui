@@ -6,3 +6,9 @@ __pycache__/
 *.pyc
 .DS_Store
 *.jsonl
+web/.argo
+web/test-results/
+web/videos/*.gif
+web/videos/*.srt
+web/videos/*.vtt
+web/videos/*.json

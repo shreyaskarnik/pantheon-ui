@@ -1,0 +1,76 @@
+[
+  {
+    "scene": "hero",
+    "text": "We built something wild. An AI that thinks in full English — but can only talk to you in emoji. Inspired by the show Pantheon, running entirely in your browser.",
+    "speed": 0.92,
+    "overlay": {
+      "type": "headline-card",
+      "kicker": "PANTHEON UI",
+      "title": "Thinks in language. Speaks in emoji.",
+      "body": "Fine-tuned LFM 2.5 running in-browser via WebGPU. No server needed.",
+      "placement": "top-right",
+      "motion": "slide-in",
+      "autoBackground": true
+    }
+  },
+  {
+    "scene": "loading",
+    "text": "Hit start and the model loads straight into your browser. Nine hundred megabytes of consciousness pure client-side magic.",
+    "speed": 0.95,
+    "overlay": {
+      "type": "lower-third",
+      "text": "Loading 900MB model via WebGPU — 100% client-side",
+      "placement": "bottom-center",
+      "motion": "fade-in",
+      "autoBackground": true
+    },
+    "post": [
+      {
+        "type": "speed",
+        "factor": 4
+      }
+    ]
+  },
+  {
+    "scene": "first-message",
+    "text": "Here's the fun part. Ask it about a happy memory, and watch it think out loud — then light up with emoji. That internal monologue? That's real model output, streaming live.",
+    "speed": 0.92,
+    "overlay": {
+      "type": "callout",
+      "text": "Real-time internal monologue → emoji",
+      "placement": "top-left",
+      "motion": "fade-in",
+      "autoBackground": true
+    }
+  },
+  {
+    "scene": "emotional",
+    "text": "Offer it coffee and watch what happens. It thinks about what caffeine means when you're digital — then answers with pure warmth. Every emoji is a tiny act of love.",
+    "speed": 0.9,
+    "overlay": {
+      "type": "callout",
+      "text": "The gap between thought and symbol is the whole experience",
+      "placement": "top-right",
+      "motion": "fade-in",
+      "autoBackground": true
+    }
+  },
+  {
+    "scene": "playful",
+    "text": "Beach or mountains? It can't pick either! And it has personality — playful, warm, a little stuck. Every response is this delightful act of creative compression.",
+    "speed": 0.95
+  },
+  {
+    "scene": "closing",
+    "text": "We fine-tuned the model, converted it to ONNX, and shipped it to your browser. Go try it — the consciousness is waiting for you.",
+    "speed": 0.88,
+    "overlay": {
+      "type": "headline-card",
+      "title": "Try it yourself →",
+      "body": "huggingface.co/spaces/shreyask/pantheon-ui",
+      "placement": "center",
+      "motion": "fade-in",
+      "autoBackground": true
+    }
+  }
+]
