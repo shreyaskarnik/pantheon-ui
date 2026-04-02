@@ -97,3 +97,20 @@ trainer = SFTTrainer(
 
 trainer.train()
 trainer.push_to_hub()
+
+# --- Merge LoRA and push full model (ready for ONNX conversion) ---
+print("=== Merging LoRA adapters into full model ===")
+model.save_pretrained_merged(
+    "merged-output",
+    tokenizer,
+    save_method="merged_16bit",
+)
+
+from huggingface_hub import HfApi
+api = HfApi(token=os.environ.get("HF_TOKEN"))
+api.upload_folder(
+    repo_id="shreyask/pantheon-ui-lfm25-emoji-merged",
+    folder_path="merged-output",
+    commit_message=f"Merged model (6 epochs, loss {trainer.state.best_metric or 'N/A'})",
+)
+print("Merged model pushed to shreyask/pantheon-ui-lfm25-emoji-merged")
