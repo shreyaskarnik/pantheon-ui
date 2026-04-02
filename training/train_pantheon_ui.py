@@ -33,9 +33,23 @@ model = FastLanguageModel.get_peft_model(
 )
 
 # ---------------------------------------------------------------------------
-# 3. Load dataset and create 90/10 train/eval split
+# 3. Load dataset, parse messages JSON, and create 90/10 train/eval split
 # ---------------------------------------------------------------------------
+import json
+
 dataset = load_dataset("shreyask/pantheon-ui-conversations", split="train")
+
+def parse_messages(example):
+    """Convert JSON string messages to list and prepend system prompt."""
+    msgs = json.loads(example["messages"])
+    system = example.get("system", "")
+    if system:
+        msgs = [{"role": "system", "content": system}] + msgs
+    return {"messages": msgs}
+
+dataset = dataset.map(parse_messages)
+dataset = dataset.remove_columns(["system"])
+
 split = dataset.train_test_split(test_size=0.1, seed=3407)
 train_dataset = split["train"]
 eval_dataset = split["test"]
