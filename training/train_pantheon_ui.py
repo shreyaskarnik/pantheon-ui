@@ -84,11 +84,15 @@ training_args = SFTConfig(
 import os
 os.environ.setdefault("TRACKIO_PROJECT", "pantheon-ui")
 
-def formatting_func(example):
-    """Format messages into the chat template string for SFT."""
-    return tokenizer.apply_chat_template(
-        example["messages"], tokenize=False, add_generation_prompt=False
-    )
+def formatting_func(examples):
+    """Format messages into chat template strings for SFT. Returns a list."""
+    texts = []
+    for msgs in examples["messages"]:
+        text = tokenizer.apply_chat_template(
+            msgs, tokenize=False, add_generation_prompt=False
+        )
+        texts.append(text)
+    return texts
 
 trainer = SFTTrainer(
     model=model,
