@@ -1,6 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { SYSTEM_PROMPT } from "../lib/constants.js";
-import { parseResponse } from "../lib/parse-response.js";
 
 export function useModel() {
   const [status, setStatus] = useState("idle");
@@ -19,11 +18,11 @@ export function useModel() {
         case "error": setError(data.error); setStatus("error"); break;
         case "start": setStatus("generating"); break;
         case "update":
-          if (resolveRef.current?.onUpdate) resolveRef.current.onUpdate(data.output, data.state);
+          if (resolveRef.current?.onUpdate) resolveRef.current.onUpdate({ thinking: data.thinking, content: data.content });
           break;
         case "complete":
           setStatus("ready");
-          if (resolveRef.current?.onComplete) resolveRef.current.onComplete(data.output);
+          if (resolveRef.current?.onComplete) resolveRef.current.onComplete({ thinking: data.thinking, content: data.content });
           resolveRef.current = null;
           break;
       }

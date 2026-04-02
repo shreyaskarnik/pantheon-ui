@@ -4,6 +4,7 @@ import {
   InterruptableStoppingCriteria,
 } from "@huggingface/transformers";
 import { MODEL_ID, GENERATION_CONFIG } from "./lib/constants.js";
+import { ThinkStreamParser } from "./lib/think-parser.js";
 
 let generator = null;
 let stoppingCriteria = null;
@@ -31,19 +32,15 @@ async function generate(messages) {
 
   stoppingCriteria.reset();
 
-  let state = "thinking";
-  let fullOutput = "";
+  const parser = new ThinkStreamParser();
 
   const streamer = new TextStreamer(generator.tokenizer, {
     skip_prompt: true,
     skip_special_tokens: false,
     callback_function: (text) => {
       if (text === "<|im_end|>") return;
-      fullOutput += text;
-      if (state === "thinking" && fullOutput.includes("</think>")) {
-        state = "answering";
-      }
-      self.postMessage({ type: "update", output: fullOutput, state });
+      parser.push(text);
+      self.postMessage({ type: "update", thinking: parser.reasoning, content: parser.content });
     },
   });
 
@@ -62,7 +59,8 @@ async function generate(messages) {
     }
   }
 
-  self.postMessage({ type: "complete", output: fullOutput });
+  parser.flush();
+  self.postMessage({ type: "complete", thinking: parser.reasoning, content: parser.content });
 }
 
 self.onmessage = async (e) => {

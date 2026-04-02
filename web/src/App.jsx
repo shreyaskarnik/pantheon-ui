@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import { useModel } from "./hooks/useModel.js";
-import { parseResponse } from "./lib/parse-response.js";
 import { SYSTEM_PROMPT } from "./lib/constants.js";
 import ChatWindow from "./components/ChatWindow.jsx";
 import StatusBar from "./components/StatusBar.jsx";
@@ -42,32 +41,28 @@ export default function App() {
     const newHistory = [...conversationHistory, userMsg];
 
     generate(newHistory, {
-      onUpdate: (output, state) => {
-        const parsed = parseResponse(output);
+      onUpdate: ({ thinking, content }) => {
         setMessages((prev) => {
           const updated = [...prev];
           updated[updated.length - 1] = {
             role: "assistant",
-            thinking: parsed.thinking,
-            emoji: state === "answering" ? parsed.emoji : null,
-            raw: output,
+            thinking,
+            emoji: content || null,
           };
           return updated;
         });
       },
-      onComplete: (output) => {
-        const parsed = parseResponse(output);
+      onComplete: ({ thinking, content }) => {
         setMessages((prev) => {
           const updated = [...prev];
           updated[updated.length - 1] = {
             role: "assistant",
-            thinking: parsed.thinking,
-            emoji: parsed.emoji,
-            raw: output,
+            thinking,
+            emoji: content || null,
           };
           return updated;
         });
-        setConversationHistory([...newHistory, { role: "assistant", content: output }]);
+        setConversationHistory([...newHistory, { role: "assistant", content }]);
       },
     });
   }, [conversationHistory, generate]);
