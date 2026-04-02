@@ -13,7 +13,7 @@ async function loadModel() {
   self.postMessage({ type: "status", status: "loading" });
 
   generator = await pipeline("text-generation", MODEL_ID, {
-    dtype: "q4",
+    dtype: "fp32",  // loads model.onnx (default precision name)
     device: "webgpu",
     progress_callback: (progress) => {
       self.postMessage({ type: "progress", progress });
