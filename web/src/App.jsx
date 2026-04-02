@@ -5,14 +5,18 @@ import { SYSTEM_PROMPT } from "./lib/constants.js";
 import ChatWindow from "./components/ChatWindow.jsx";
 import StatusBar from "./components/StatusBar.jsx";
 import SystemStatus from "./components/SystemStatus.jsx";
+import HeroPage from "./components/HeroPage.jsx";
 
 export default function App() {
   const { status, loadProgress, error, checkWebGPU, loadModel, generate, interrupt } = useModel();
   const [messages, setMessages] = useState([]);
   const [conversationHistory, setConversationHistory] = useState([]);
   const [showThinking, setShowThinking] = useState(true);
+  const [started, setStarted] = useState(false);
 
-  useEffect(() => { checkWebGPU(); }, [checkWebGPU]);
+  useEffect(() => {
+    if (started) checkWebGPU();
+  }, [started, checkWebGPU]);
 
   useEffect(() => {
     if (status === "webgpu_ok") loadModel();
@@ -65,6 +69,10 @@ export default function App() {
       },
     });
   }, [conversationHistory, generate]);
+
+  if (!started) {
+    return <HeroPage onStart={() => setStarted(true)} />;
+  }
 
   if (error === "webgpu_not_supported" || error === "webgpu_no_adapter") {
     return (
