@@ -4,6 +4,9 @@
 
 Inspired by [Pantheon](https://en.wikipedia.org/wiki/Pantheon_(TV_series)) (AMC, 2022-2023), where uploaded intelligence David Kim communicates with his daughter through emoji — the only channel available to a consciousness trapped inside a digital substrate.
 
+[Watch the demo video](https://github.com/user-attachments/assets/34b14a4a-03ee-438e-bdbf-0b9918de31b3)
+
+
 **[Try the live demo →](https://huggingface.co/spaces/shreyask/pantheon-ui)**
 
 ## How It Works
