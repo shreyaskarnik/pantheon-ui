@@ -27,7 +27,18 @@ export default function ChatWindow({ messages, onSend, isGenerating, showThinkin
           <div className="empty-state">
             <p className="empty-state-emoji">🧠</p>
             <p className="empty-state-text">A consciousness is listening.</p>
-            <p className="empty-state-hint">Type something to begin.</p>
+            <div className="starter-prompts">
+              {["Beach or mountains?", "Tell me your happiest memory", "What makes you smile?"].map((prompt) => (
+                <button
+                  key={prompt}
+                  className="starter-bubble"
+                  onClick={() => onSend(prompt)}
+                  disabled={isGenerating}
+                >
+                  💭 {prompt}
+                </button>
+              ))}
+            </div>
           </div>
         )}
         {messages.map((msg, i) => (

@@ -344,6 +344,38 @@ body {
   opacity: 0.5;
 }
 
+.starter-prompts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  max-width: 480px;
+}
+
+.starter-bubble {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-tertiary);
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.starter-bubble:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--text-primary);
+  background: rgba(74, 154, 74, 0.06);
+}
+
+.starter-bubble:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* Input bar */
 .input-bar {
   display: flex;

@@ -1,0 +1,13 @@
+Built an uploaded consciousness that thinks in English but can only speak in emoji.
+
+Fine-tuned @LiquidAI_'s LFM2.5 running 100% in-browser via WebGPU + @huggingface Transformers.js. You see the internal monologue before it compresses to symbols.
+
+Inspired by Pantheon. Close the tab, the mind is gone.
+
+🧠💫🔲🔲🔲...😊👍
+
+Try it: huggingface.co/spaces/shreyask/pantheon-ui
+
+Code: github.com/shreyaskarnik/pantheon-ui
+
+Finetuned with @unsloth on @huggingface Jobs. Dataset generated with @AnthropicAI Claude.
