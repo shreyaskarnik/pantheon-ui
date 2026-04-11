@@ -63,14 +63,15 @@ print(tokenizer.decode(output[0], skip_special_tokens=True))
 
 ## Training Details
 
-- **Base model**: LiquidAI/LFM2.5-1.2B-Thinking
-- **Method**: SFT with LoRA (r=16, alpha=32) via Unsloth
-- **Dataset**: [shreyask/pantheon-ui-conversations](https://huggingface.co/datasets/shreyask/pantheon-ui-conversations)
+- **Base model**: [LFM2.5-1.2B-Thinking](https://huggingface.co/LiquidAI/LFM2.5-1.2B-Thinking) by [Liquid AI](https://www.liquid.ai/)
+- **Method**: SFT with LoRA (r=16, alpha=32) via [Unsloth](https://unsloth.ai/)
+- **Dataset**: [shreyask/pantheon-ui-conversations](https://huggingface.co/datasets/shreyask/pantheon-ui-conversations) (600 conversations)
 - **LoRA targets**: q_proj, k_proj, v_proj, out_proj, in_proj, w1, w2, w3
-- **Epochs**: 3
+- **Epochs**: 6
+- **Final loss**: 1.059
 - **Learning rate**: 2e-4
 - **Batch size**: 4 (effective 16 with gradient accumulation)
-- **Hardware**: HF Jobs (A10G)
+- **Hardware**: [HF Jobs](https://huggingface.co/docs/huggingface_hub/guides/jobs) (A10G)
 
 ## Limitations
 
