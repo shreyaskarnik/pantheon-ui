@@ -36,8 +36,9 @@ export function useModel() {
     workerRef.current?.postMessage({ type: "check" });
   }, []);
 
-  const loadModel = useCallback(() => {
-    workerRef.current?.postMessage({ type: "load" });
+  const loadModel = useCallback((modelId, dtype) => {
+    setError(null);
+    workerRef.current?.postMessage({ type: "load", payload: { modelId, dtype } });
   }, []);
 
   const generate = useCallback((messages, { onUpdate, onComplete }) => {

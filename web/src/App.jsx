@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useModel } from "./hooks/useModel.js";
-import { SYSTEM_PROMPT } from "./lib/constants.js";
+import { MODELS, DEFAULT_MODEL, SYSTEM_PROMPT } from "./lib/constants.js";
 import ChatWindow from "./components/ChatWindow.jsx";
 import StatusBar from "./components/StatusBar.jsx";
 import SystemStatus from "./components/SystemStatus.jsx";
@@ -14,14 +14,18 @@ export default function App() {
   const [showThinking, setShowThinking] = useState(true);
   const [started, setStarted] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
 
   useEffect(() => {
     if (started) checkWebGPU();
   }, [started, checkWebGPU]);
 
   useEffect(() => {
-    if (status === "webgpu_ok") loadModel();
-  }, [status, loadModel]);
+    if (status === "webgpu_ok") {
+      const m = MODELS[selectedModel];
+      loadModel(m.id, m.dtype);
+    }
+  }, [status, loadModel, selectedModel]);
 
   // T key toggles thinking traces
   useEffect(() => {
@@ -33,6 +37,15 @@ export default function App() {
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, []);
+
+  const handleModelSwitch = (key) => {
+    if (key === selectedModel || status === "generating") return;
+    setSelectedModel(key);
+    setMessages([]);
+    setConversationHistory([]);
+    const m = MODELS[key];
+    loadModel(m.id, m.dtype);
+  };
 
   const handleSend = useCallback((text) => {
     const userMsg = { role: "user", content: text };
@@ -53,7 +66,6 @@ export default function App() {
         });
       },
       onComplete: ({ thinking, content }) => {
-        // Fallback thinking trace when model skips <think> tags
         const fallbackThinking = thinking || (content ? "Compressing what I feel into symbols... hoping it reaches through." : null);
         setMessages((prev) => {
           const updated = [...prev];
@@ -77,7 +89,7 @@ export default function App() {
     return (
       <div className="app">
         <div className="webgpu-fallback">
-          <h2>⚠️ SIGNAL LOST</h2>
+          <h2>SIGNAL LOST</h2>
           <p>Your browser does not support WebGPU.<br />The uploaded intelligence requires a WebGPU-capable browser (Chrome 113+, Edge 113+).</p>
           <p><a href="https://caniuse.com/webgpu" target="_blank" rel="noopener">Learn more about WebGPU support</a></p>
         </div>
@@ -90,6 +102,16 @@ export default function App() {
       <header className="app-header">
         <span className="app-title">Pantheon UI</span>
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          <select
+            className="model-selector"
+            value={selectedModel}
+            onChange={(e) => handleModelSwitch(e.target.value)}
+            disabled={status === "generating" || status === "loading"}
+          >
+            {Object.entries(MODELS).map(([key, m]) => (
+              <option key={key} value={key}>{m.name}</option>
+            ))}
+          </select>
           <button className="toggle-thinking" onClick={() => setShowAbout((prev) => !prev)}>
             About
           </button>

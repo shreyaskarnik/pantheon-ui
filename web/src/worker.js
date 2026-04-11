@@ -3,23 +3,38 @@ import {
   TextStreamer,
   InterruptableStoppingCriteria,
 } from "@huggingface/transformers";
-import { MODEL_ID, GENERATION_CONFIG } from "./lib/constants.js";
+import { GENERATION_CONFIG } from "./lib/constants.js";
 import { ThinkStreamParser } from "./lib/think-parser.js";
 
 let generator = null;
 let stoppingCriteria = null;
+let currentModelId = null;
 
-async function loadModel() {
+async function loadModel(modelId, dtype) {
+  // If same model already loaded, skip
+  if (generator && currentModelId === modelId) {
+    self.postMessage({ type: "status", status: "ready" });
+    return;
+  }
+
+  // Dispose old model if switching
+  if (generator) {
+    await generator.dispose();
+    generator = null;
+    currentModelId = null;
+  }
+
   self.postMessage({ type: "status", status: "loading" });
 
-  generator = await pipeline("text-generation", MODEL_ID, {
-    dtype: "q4",
+  generator = await pipeline("text-generation", modelId, {
+    dtype: dtype || "q4",
     device: "webgpu",
     progress_callback: (progress) => {
       self.postMessage({ type: "progress", progress });
     },
   });
 
+  currentModelId = modelId;
   stoppingCriteria = new InterruptableStoppingCriteria();
   self.postMessage({ type: "status", status: "ready" });
 }
@@ -38,7 +53,7 @@ async function generate(messages) {
     skip_prompt: true,
     skip_special_tokens: false,
     callback_function: (text) => {
-      if (text === "<|im_end|>") return;
+      if (text === "<|im_end|>" || text === "<end_of_turn>") return;
       parser.push(text);
       self.postMessage({ type: "update", thinking: parser.reasoning, content: parser.content });
     },
@@ -81,7 +96,7 @@ self.onmessage = async (e) => {
       break;
     }
     case "load":
-      try { await loadModel(); }
+      try { await loadModel(payload.modelId, payload.dtype); }
       catch (e) { self.postMessage({ type: "error", error: `${e.message}\n\n${e.stack}` }); }
       break;
     case "generate":
