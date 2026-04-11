@@ -100,6 +100,7 @@ model.save_pretrained_merged(
 
 from huggingface_hub import HfApi
 api = HfApi(token=os.environ.get("HF_TOKEN"))
+api.create_repo("shreyask/pantheon-ui-gemma4-emoji-merged", exist_ok=True)
 api.upload_folder(
     repo_id="shreyask/pantheon-ui-gemma4-emoji-merged",
     folder_path="merged-output",
