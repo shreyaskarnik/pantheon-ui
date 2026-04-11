@@ -7,7 +7,7 @@ export const MODELS = {
   },
   "gemma4": {
     id: "shreyask/pantheon-ui-gemma4-onnx",
-    name: "Gemma 4 1B",
+    name: "Gemma 4 E2B",
     description: "Google — fine-tuned for emoji",
     dtype: "q4",
   },

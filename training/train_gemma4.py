@@ -2,7 +2,7 @@
 # dependencies = ["unsloth", "trl>=0.12.0", "datasets", "trackio", "peft"]
 # ///
 
-"""Fine-tune Gemma 4 1B for emoji-only output with thinking traces."""
+"""Fine-tune Gemma 4 E2B for emoji-only output with thinking traces."""
 
 from unsloth import FastLanguageModel
 from datasets import load_dataset
@@ -11,10 +11,10 @@ import json
 import os
 
 # ---------------------------------------------------------------------------
-# 1. Load Gemma 4 1B with 4-bit quantisation
+# 1. Load Gemma 4 E2B with 4-bit quantisation
 # ---------------------------------------------------------------------------
 model, tokenizer = FastLanguageModel.from_pretrained(
-    "unsloth/gemma-4-1b-it",
+    "unsloth/gemma-4-E2B-it",
     load_in_4bit=True,
     max_seq_length=1024,
 )
