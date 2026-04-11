@@ -58,11 +58,20 @@ original_arch = config.get("architectures", [])
 config["architectures"] = ["Gemma3ForConditionalGeneration"]
 config["model_type"] = "gemma3"
 
-# Promote text_config fields
+# Promote text_config fields to root level
 text_cfg = config.get("text_config", {})
-for key in ["vocab_size", "hidden_size", "num_hidden_layers", "num_attention_heads", "num_key_value_heads"]:
+for key in ["vocab_size", "hidden_size", "num_hidden_layers", "num_attention_heads",
+            "num_key_value_heads", "head_dim", "intermediate_size", "max_position_embeddings",
+            "sliding_window_size", "attn_logit_softcapping"]:
     if config.get(key) is None and key in text_cfg:
         config[key] = text_cfg[key]
+
+# Add rope_local_base_freq (required by Gemma3 builder)
+# Gemma4 stores this in text_config.rope_parameters.sliding_attention.rope_theta
+rope_params = text_cfg.get("rope_parameters", {})
+sliding_rope = rope_params.get("sliding_attention", {})
+config["rope_local_base_freq"] = sliding_rope.get("rope_theta", 10000.0)
+config["rope_theta"] = rope_params.get("full_attention", {}).get("rope_theta", 1000000.0)
 
 with open(config_path, "w") as f:
     json.dump(config, f, indent=2)
