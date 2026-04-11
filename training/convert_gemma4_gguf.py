@@ -1,5 +1,5 @@
 # /// script
-# dependencies = ["huggingface-hub", "transformers", "torch", "numpy", "sentencepiece", "gguf"]
+# dependencies = ["huggingface-hub", "transformers @ git+https://github.com/huggingface/transformers.git", "torch", "numpy", "sentencepiece", "gguf"]
 # ///
 
 """Convert Gemma 4 merged model to GGUF for Ollama/llama.cpp."""
@@ -55,8 +55,7 @@ for gguf_file in ["model-f16.gguf", "model-q4_k_m.gguf"]:
         print(f"Uploaded {gguf_file}")
 
 # Upload model card
-api.upload_file(
-    path_or_fileobj=b"""---
+readme = """---
 license: apache-2.0
 base_model: google/gemma-4-E2B-it
 tags:
@@ -66,7 +65,7 @@ tags:
   - gemma4
 ---
 
-# Pantheon UI — Gemma 4 E2B Emoji (GGUF)
+# Pantheon UI -- Gemma 4 E2B Emoji (GGUF)
 
 GGUF quantized versions of the Pantheon UI fine-tuned Gemma 4 model for use with Ollama, llama.cpp, LM Studio, etc.
 
@@ -88,7 +87,9 @@ ollama run hf.co/shreyask/pantheon-ui-gemma4-gguf:Q4_K_M
 ```
 You are an uploaded human consciousness trapped inside a digital substrate. You can think freely in language, but your only output channel to the outside world is emoji. Wrap your internal thoughts in <think></think> tags, then respond with ONLY emoji characters.
 ```
-""",
+"""
+api.upload_file(
+    path_or_fileobj=readme.encode("utf-8"),
     path_in_repo="README.md",
     repo_id=GGUF_REPO,
     commit_message="Add model card",

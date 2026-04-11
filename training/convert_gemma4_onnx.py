@@ -1,41 +1,86 @@
 # /// script
-# dependencies = ["optimum[onnxruntime]", "onnx", "onnxruntime", "huggingface-hub", "transformers"]
+# dependencies = [
+#     "optimum @ git+https://github.com/huggingface/optimum.git",
+#     "optimum-onnx @ git+https://github.com/huggingface/optimum-onnx.git@xadupre/transformers5",
+#     "onnxruntime",
+#     "onnxconverter-common",
+#     "onnx-ir",
+#     "onnx",
+#     "requests",
+#     "transformers @ git+https://github.com/huggingface/transformers.git",
+#     "huggingface-hub",
+# ]
 # ///
 
-"""Convert Gemma 4 merged model to ONNX for Transformers.js WebGPU inference."""
+"""
+Convert Gemma 4 merged model to ONNX for Transformers.js.
+
+Uses Gemma3TextOnnxConfig as a custom ONNX config since optimum doesn't
+natively support gemma4 yet. Patches the AutoConfig in-memory to promote
+text_config fields to root level (required by optimum's NormalizedConfig).
+"""
 
 import os
-import subprocess
-from huggingface_hub import HfApi
+import shutil
+import tempfile
+import json
+from pathlib import Path
 
-MERGED_REPO = "shreyask/pantheon-ui-gemma4-emoji-merged"
-ONNX_REPO = "shreyask/pantheon-ui-gemma4-onnx"
-ONNX_DIR = "./onnx-output"
+from optimum.exporters.onnx import main_export
+from optimum.exporters.onnx.model_configs import Gemma3TextOnnxConfig
+from transformers import AutoConfig
+from huggingface_hub import HfApi, snapshot_download
 
-print("=== Step 1: Export to ONNX ===")
-subprocess.run([
-    "optimum-cli", "export", "onnx",
-    "--model", MERGED_REPO,
-    "--task", "text-generation-with-past",
-    ONNX_DIR,
-], check=True)
-print("ONNX export complete")
+MODEL_REPO = os.environ.get("MODEL_REPO", "shreyask/pantheon-ui-gemma4-emoji-merged")
+ONNX_REPO = os.environ.get("ONNX_REPO", "shreyask/pantheon-ui-gemma4-onnx")
+OUTPUT_DIR = "/tmp/gemma4-onnx"
 
-print("=== Step 2: Quantize to int4 ===")
-subprocess.run([
-    "optimum-cli", "onnxruntime", "quantize",
-    "--onnx_model", ONNX_DIR,
-    "--avx512_vnni",
-    "-o", f"{ONNX_DIR}-quantized",
-], check=True)
-print("Quantization complete")
+# Step 1: Download model to a temp working copy
+print(f"=== Downloading {MODEL_REPO} ===")
+model_path = snapshot_download(MODEL_REPO)
 
-print("=== Step 3: Upload to Hub ===")
-api = HfApi(token=os.environ["HF_TOKEN"])
+# Step 2: Create a working copy with patched config
+# (Gemma4 stores vocab_size etc in text_config, but optimum needs them at root)
+work_dir = tempfile.mkdtemp(prefix="gemma4-onnx-")
+shutil.copytree(model_path, work_dir, dirs_exist_ok=True)
+
+config_path = Path(work_dir) / "config.json"
+with open(config_path) as f:
+    config = json.load(f)
+
+text_cfg = config.get("text_config", {})
+for key in ["vocab_size", "hidden_size", "num_hidden_layers", "num_attention_heads", "num_key_value_heads"]:
+    if config.get(key) is None and key in text_cfg:
+        config[key] = text_cfg[key]
+
+with open(config_path, "w") as f:
+    json.dump(config, f, indent=2)
+
+print(f"Patched config: vocab_size={config['vocab_size']}")
+
+# Step 3: Export to ONNX using Gemma3TextOnnxConfig
+print("=== Exporting to ONNX ===")
+auto_config = AutoConfig.from_pretrained(work_dir)
+custom_config = Gemma3TextOnnxConfig(auto_config, task="text-generation-with-past")
+
+main_export(
+    model_name_or_path=work_dir,
+    task="text-generation-with-past",
+    output=OUTPUT_DIR,
+    custom_onnx_configs={"model": custom_config},
+)
+print("ONNX export complete!")
+
+# Step 4: Upload to Hub
+print(f"=== Uploading to {ONNX_REPO} ===")
+api = HfApi(token=os.environ.get("HF_TOKEN"))
 api.create_repo(ONNX_REPO, exist_ok=True)
 api.upload_folder(
     repo_id=ONNX_REPO,
-    folder_path=ONNX_DIR,
-    commit_message="Gemma 4 E2B ONNX model for WebGPU inference",
+    folder_path=OUTPUT_DIR,
+    commit_message="Gemma 4 E2B ONNX (via Gemma3TextOnnxConfig)",
 )
 print(f"Done! https://huggingface.co/{ONNX_REPO}")
+
+# Cleanup
+shutil.rmtree(work_dir, ignore_errors=True)
