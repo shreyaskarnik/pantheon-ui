@@ -31,7 +31,7 @@ from pathlib import Path
 
 # Step 0: Install optimum-onnx from transformers5 branch (bypasses version cap)
 subprocess.run([
-    sys.executable, "-m", "pip", "install",
+    "uv", "pip", "install",
     "optimum-onnx @ git+https://github.com/huggingface/optimum-onnx.git@xadupre/transformers5",
     "--no-deps", "-q",
 ], check=True)
