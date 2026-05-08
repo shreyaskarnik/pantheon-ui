@@ -33,8 +33,11 @@ export default function Reconstruction({ originalText, reconstructions, showThin
           const isPending = rec.status === "pending";
           const isGenerating = rec.status === "generating";
           const isError = rec.status === "error";
+          const isComplete = rec.status === "complete";
+          const text = rec.text?.trim() || "";
+          const isSilent = isComplete && !text;
           return (
-            <li key={i} className={`reconstruction-item status-${rec.status}`}>
+            <li key={i} className={`reconstruction-item status-${rec.status}${isSilent ? " is-silent" : ""}`}>
               <div className="reconstruction-tag-row">
                 <span className="reconstruction-tag">
                   RECONSTRUCTION {i + 1} / {reconstructions.length}
@@ -42,6 +45,7 @@ export default function Reconstruction({ originalText, reconstructions, showThin
                 {isGenerating && <span className="reconstruction-cursor">▋</span>}
                 {isPending && <span className="reconstruction-pending">queued</span>}
                 {isError && <span className="reconstruction-error-tag">decode error</span>}
+                {isSilent && <span className="reconstruction-pending">channel silent</span>}
                 {showThinking && rec.thinking && rec.status !== "pending" && (
                   <button
                     type="button"
@@ -56,7 +60,7 @@ export default function Reconstruction({ originalText, reconstructions, showThin
                 <p className="reconstruction-trace">{rec.thinking}</p>
               )}
               <p className={`reconstruction-text ${isGenerating ? "is-generating" : ""}`}>
-                {rec.text || (isPending ? "…" : "")}
+                {text || (isPending ? "…" : isSilent ? "— the bottleneck swallowed it —" : "")}
               </p>
             </li>
           );

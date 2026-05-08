@@ -955,6 +955,12 @@ body {
   color: var(--status-active);
 }
 
+.reconstruction-item.is-silent .reconstruction-text {
+  color: var(--text-secondary);
+  font-style: italic;
+  opacity: 0.6;
+}
+
 .toggle-thinking:disabled {
   opacity: 0.35;
   cursor: not-allowed;
