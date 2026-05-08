@@ -157,16 +157,19 @@ export default function App() {
   const handleSend = useCallback((text) => {
     const userMsg = { role: "user", content: text };
 
-    let assistantIdx = -1;
+    // Set the ref *inside* the updater. Reading the index after setMessages
+    // returns is unsafe — React batches the updater to run later in the same
+    // event tick, so the outside read can see a stale value (esp. on the
+    // empty-state first send via starter chips, where there's no other
+    // intervening setState to force a flush).
     setMessages((prev) => {
-      assistantIdx = prev.length + 1;
+      messageIdxRef.current = prev.length + 1;
       return [
         ...prev,
         userMsg,
         { role: "assistant", thinking: null, emoji: null, reconstructions: null, originalText: text },
       ];
     });
-    messageIdxRef.current = assistantIdx;
 
     const newHistory = [...conversationHistory, userMsg];
 
