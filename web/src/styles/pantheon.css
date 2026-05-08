@@ -761,3 +761,201 @@ body {
 .about-credits-list a:hover {
   border-color: var(--accent);
 }
+
+/* ─── Round-trip autoencoder: decoder reconstruction ──────────────────────── */
+
+.decoder-status {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: var(--status-loading);
+  background: rgba(74, 138, 255, 0.07);
+  border: 1px solid rgba(74, 138, 255, 0.25);
+  padding: 0.4rem 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+.decoder-status-error {
+  color: var(--status-error);
+  background: rgba(255, 74, 74, 0.07);
+  border-color: rgba(255, 74, 74, 0.25);
+}
+
+.reconstruction-block {
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed rgba(140, 180, 140, 0.18);
+  position: relative;
+}
+
+.reconstruction-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  color: var(--status-loading);
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+
+.reconstruction-arrow {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.reconstruction-original {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  background: rgba(74, 138, 255, 0.04);
+  border-left: 2px solid rgba(74, 138, 255, 0.4);
+  padding: 0.45rem 0.75rem;
+  margin-bottom: 0.5rem;
+  border-radius: 2px;
+}
+
+.reconstruction-original-text {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.reconstruction-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.reconstruction-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.reconstruction-item {
+  background: rgba(140, 180, 140, 0.04);
+  border-left: 2px solid var(--accent-dim);
+  padding: 0.45rem 0.75rem;
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.reconstruction-item.status-pending {
+  opacity: 0.4;
+  border-left-color: var(--text-dim);
+}
+
+.reconstruction-item.status-generating {
+  border-left-color: var(--status-active);
+}
+
+.reconstruction-item.status-error {
+  border-left-color: var(--status-error);
+  background: rgba(255, 74, 74, 0.04);
+}
+
+/* Subtle scanline / signal-degradation overlay */
+.reconstruction-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(255, 255, 255, 0.012) 3px,
+    rgba(255, 255, 255, 0.012) 4px
+  );
+}
+
+.reconstruction-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.reconstruction-cursor {
+  animation: blink 0.8s step-end infinite;
+  color: var(--status-active);
+  font-size: 0.7rem;
+}
+
+.reconstruction-pending {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.reconstruction-error-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--status-error);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.reconstruction-trace-toggle {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid rgba(140, 180, 140, 0.2);
+  color: var(--thinking-color);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  padding: 0.1rem 0.4rem;
+  border-radius: 2px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.reconstruction-trace-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.reconstruction-trace {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--thinking-color);
+  line-height: 1.6;
+  margin: 0.35rem 0 0.4rem;
+  font-weight: 300;
+  border-left: 1px solid rgba(140, 180, 140, 0.2);
+  padding-left: 0.5rem;
+}
+
+.reconstruction-text {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--text-primary);
+  /* very subtle desaturation hints "this is a reconstruction, not the original" */
+  filter: saturate(0.85);
+  text-shadow: 0 0 0.5px rgba(140, 180, 140, 0.15);
+  position: relative;
+  z-index: 1;
+}
+
+.reconstruction-text.is-generating {
+  color: var(--status-active);
+}
+
+.toggle-thinking:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}

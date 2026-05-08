@@ -11,13 +11,11 @@ let stoppingCriteria = null;
 let currentModelId = null;
 
 async function loadModel(modelId, dtype) {
-  // If same model already loaded, skip
   if (generator && currentModelId === modelId) {
     self.postMessage({ type: "status", status: "ready" });
     return;
   }
 
-  // Dispose old model if switching
   if (generator) {
     await generator.dispose();
     generator = null;
@@ -39,13 +37,16 @@ async function loadModel(modelId, dtype) {
   self.postMessage({ type: "status", status: "ready" });
 }
 
-async function generate(messages) {
+async function generate(messages, options = {}) {
   if (!generator) {
     self.postMessage({ type: "error", error: "Model not loaded" });
     return;
   }
 
   stoppingCriteria.reset();
+
+  const requestId = options.requestId ?? null;
+  const generationConfig = { ...GENERATION_CONFIG, ...(options.generationConfig || {}) };
 
   const parser = new ThinkStreamParser();
 
@@ -55,27 +56,37 @@ async function generate(messages) {
     callback_function: (text) => {
       if (text === "<|im_end|>" || text === "<end_of_turn>") return;
       parser.push(text);
-      self.postMessage({ type: "update", thinking: parser.reasoning, content: parser.content });
+      self.postMessage({
+        type: "update",
+        requestId,
+        thinking: parser.reasoning,
+        content: parser.content,
+      });
     },
   });
 
-  self.postMessage({ type: "start" });
+  self.postMessage({ type: "start", requestId });
 
   try {
     await generator(messages, {
-      ...GENERATION_CONFIG,
+      ...generationConfig,
       streamer,
       stopping_criteria: stoppingCriteria,
     });
   } catch (e) {
     if (e.message !== "Generation interrupted") {
-      self.postMessage({ type: "error", error: `${e.message}\n\n${e.stack}` });
+      self.postMessage({ type: "error", requestId, error: `${e.message}\n\n${e.stack}` });
       return;
     }
   }
 
   parser.flush();
-  self.postMessage({ type: "complete", thinking: parser.reasoning, content: parser.content });
+  self.postMessage({
+    type: "complete",
+    requestId,
+    thinking: parser.reasoning,
+    content: parser.content,
+  });
 }
 
 self.onmessage = async (e) => {
@@ -100,7 +111,10 @@ self.onmessage = async (e) => {
       catch (e) { self.postMessage({ type: "error", error: `${e.message}\n\n${e.stack}` }); }
       break;
     case "generate":
-      await generate(payload.messages);
+      await generate(payload.messages, {
+        requestId: payload.requestId,
+        generationConfig: payload.generationConfig,
+      });
       break;
     case "interrupt":
       stoppingCriteria?.interrupt();

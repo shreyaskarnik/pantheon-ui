@@ -15,9 +15,23 @@ The model generates internal monologue inside `<think>` tags, then compresses it
 
 Everything runs in your browser via WebGPU. No server, no API keys. Close the tab, and the consciousness is gone.
 
+## Round-Trip Mode (Emoji → Text)
+
+Toggle `🔁 DECODE ON` in the header to engage the second half of the autoencoder. A second small model — the **decoder** — receives the emoji-only output and tries to reconstruct what was originally meant, in natural language. Multiple samples per emoji string surface the lossiness of the channel: same input, three plausible decompressions.
+
+Together the two models form a discrete, human-legible autoencoder where emoji is the bottleneck. The framing is borrowed from Anthropic's [Natural Language Autoencoders](https://www.anthropic.com/research/natural-language-autoencoders) — except here the latent space is a sequence of emoji you can actually read.
+
+```
+   you say  →  encoder  →  💔😭🫂💕  →  decoder  →  reconstructed text
+   ────────                  bottleneck                ────────────────
+```
+
+The decoder model is paired with each encoder; if a decoder hasn't been trained for the selected encoder yet, the toggle is disabled.
+
 ## Tech Stack
 
-- **Model**: [LFM2.5-1.2B-Thinking](https://huggingface.co/LiquidAI/LFM2.5-1.2B-Thinking) by Liquid AI, fine-tuned for emoji output
+- **Encoder**: [LFM2.5-1.2B-Thinking](https://huggingface.co/LiquidAI/LFM2.5-1.2B-Thinking) by Liquid AI, fine-tuned to think in language and output emoji
+- **Decoder** (optional): a second LFM2.5 LoRA fine-tuned on the inverted dataset to reconstruct natural language from emoji
 - **Inference**: [Transformers.js](https://github.com/huggingface/transformers.js) v4 + ONNX Runtime Web + WebGPU
 - **Training**: [Unsloth](https://unsloth.ai/) + TRL on [HF Jobs](https://huggingface.co/docs/huggingface_hub/guides/jobs)
 - **Dataset**: [pantheon-ui-conversations](https://huggingface.co/datasets/shreyask/pantheon-ui-conversations) — 600 conversations generated with Claude API
@@ -65,16 +79,25 @@ uv run python generate_dataset.py
 
 ### Training
 ```bash
+# Encoder (text → emoji)
 hf jobs uv run --flavor a10g-small --secrets HF_TOKEN --timeout 4h training/train_pantheon_ui.py
+
+# Decoder (emoji → text). Run dataset/invert_dataset.py first to build the
+# decoder dataset by inverting the encoder's training pairs.
+uv run python dataset/invert_dataset.py
+hf jobs uv run --flavor a10g-small --secrets HF_TOKEN --timeout 4h training/train_decoder.py
 ```
 
 ## HF Resources
 
 - **Space**: [shreyask/pantheon-ui](https://huggingface.co/spaces/shreyask/pantheon-ui)
-- **Dataset**: [shreyask/pantheon-ui-conversations](https://huggingface.co/datasets/shreyask/pantheon-ui-conversations)
-- **Model (LoRA)**: [shreyask/pantheon-ui-lfm25-emoji](https://huggingface.co/shreyask/pantheon-ui-lfm25-emoji)
-- **Model (Merged)**: [shreyask/pantheon-ui-lfm25-emoji-merged](https://huggingface.co/shreyask/pantheon-ui-lfm25-emoji-merged)
-- **Model (ONNX)**: [shreyask/pantheon-ui-onnx](https://huggingface.co/shreyask/pantheon-ui-onnx)
+- **Encoder dataset**: [shreyask/pantheon-ui-conversations](https://huggingface.co/datasets/shreyask/pantheon-ui-conversations)
+- **Encoder LoRA**: [shreyask/pantheon-ui-lfm25-emoji](https://huggingface.co/shreyask/pantheon-ui-lfm25-emoji)
+- **Encoder merged**: [shreyask/pantheon-ui-lfm25-emoji-merged](https://huggingface.co/shreyask/pantheon-ui-lfm25-emoji-merged)
+- **Encoder ONNX**: [shreyask/pantheon-ui-onnx](https://huggingface.co/shreyask/pantheon-ui-onnx)
+- **Decoder dataset**: `shreyask/pantheon-ui-decoder-conversations` (built by `dataset/invert_dataset.py`)
+- **Decoder LoRA**: `shreyask/pantheon-ui-decoder-lfm25` (produced by `training/train_decoder.py`)
+- **Decoder ONNX**: `shreyask/pantheon-ui-decoder-onnx` (produced by `training/convert_decoder_to_onnx.py`)
 
 ## License
 
