@@ -62,7 +62,7 @@
   },
   {
     "scene": "decode-toggle",
-    "text": "Now flip the switch. There's a second model — a decoder — that reads the emoji and reconstructs what was said in plain English. Same idea as Anthropic's natural-language autoencoders, except the latent space is emoji you can actually read.",
+    "text": "Now flip the switch. There's a second model — a decoder — that reads the emoji and reconstructs what was said in plain English. Two passes: text in, emoji through, language back out.",
     "speed": 0.92,
     "overlay": {
       "type": "callout",
@@ -84,9 +84,9 @@
     "speed": 0.92,
     "overlay": {
       "type": "headline-card",
-      "kicker": "AUTOENCODER",
+      "kicker": "ROUND-TRIP",
       "title": "text  →  💔😭🫂💕  →  text",
-      "body": "Three reconstructions per message — the lossy bottleneck made visible.",
+      "body": "Three reconstructions per message — lossiness made visible.",
       "placement": "top-right",
       "motion": "slide-in",
       "autoBackground": true
@@ -94,7 +94,7 @@
   },
   {
     "scene": "closing",
-    "text": "Two small models, both running in your browser. An encoder that compresses language into emoji, a decoder that reads it back. The autoencoder you can read. Go try it — both directions are waiting.",
+    "text": "Two small models, both running in your browser. An encoder that compresses language into emoji, a decoder that reads it back. A round-trip translator you can watch in motion. Go try it — both directions are waiting.",
     "speed": 0.88,
     "overlay": {
       "type": "headline-card",

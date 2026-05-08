@@ -9,12 +9,15 @@ the message that was compressed into emoji. So for each assistant turn we emit
 a new training pair where the emoji becomes the user input and the thinking
 trace becomes the assistant's reconstructed natural-language output.
 
-Together the two models form a lossy autoencoder with emoji as the bottleneck
-(see Anthropic, "Natural Language Autoencoders").
+Together the two models form a round-trip translator: text -> emoji -> text,
+with emoji as a discrete, human-legible intermediate. Inspired by Anthropic's
+"Natural Language Autoencoders".
 
 Run: uv run python invert_dataset.py
+     uv run python invert_dataset.py --dry-run   # preview without pushing
 """
 
+import argparse
 import json
 import re
 from pathlib import Path
@@ -45,12 +48,27 @@ DECODER_SYSTEM_PROMPTS = [
         "<think></think> tags, then write the reconstructed message."
     ),
     (
-        "Emoji are the lossy bottleneck of an autoencoder: a person tried to "
-        "say something, compressed it into emoji, and now you have to decompress "
-        "it back into natural language. Reason about each symbol's contribution "
-        "in <think></think> tags, then output the most likely original message "
+        "Emoji are a lossy intermediate: a person tried to say something, "
+        "compressed it into emoji, and now you have to decompress it back into "
+        "natural language. Reason about each symbol's contribution in "
+        "<think></think> tags, then output the most likely original message "
         "in plain English."
     ),
+]
+
+# Generic, perspective-correct think placeholders. We deliberately don't use
+# the encoder's think trace as the decoder target: the encoder thought from
+# the upload's perspective ("I feel her rage…"), but the decoder's job is to
+# decode emoji into the most likely original message, which is a different
+# speaker's words. Using the encoder's CoT scrambles the perspective.
+#
+# These placeholders are short, vary by system prompt, and frame the reasoning
+# from the decoder's actual perspective ("reading these symbols…"). The model
+# will learn to emit a templated think block + a unique reconstruction.
+DECODER_THINK_PLACEHOLDERS = [
+    "Reading these emoji as compressed signal — each symbol carries a fragment of mood, action, or referent. Reconstructing the most plausible plain-language message the upload was trying to send.",
+    "Decoding one emoji at a time, weighing what the sender most likely intended, and assembling the natural-language equivalent of the original utterance.",
+    "These emoji are a lossy compression of an utterance. Inferring the most likely original words from the symbols and the implicit emotional context.",
 ]
 
 THINK_RE = re.compile(r"^<think>([\s\S]+?)</think>\s*([\s\S]+)$")
@@ -67,13 +85,19 @@ def invert_conversation(conv: dict, prompt_idx: int) -> list[dict]:
     """Turn an encoder conversation into one or more decoder pairs.
 
     Each (user_text, assistant_emoji+thinking) pair becomes a decoder pair:
-      - decoder user input = the emoji
-      - decoder assistant output = <think> brief interpretation </think> + the
+      - decoder user input = the emoji (encoder's output)
+      - decoder assistant output = <think> generic placeholder </think> + the
         original user_text (what the upload was responding to / about).
+
+    The encoder's `<think>` content is intentionally discarded — see the
+    comment on DECODER_THINK_PLACEHOLDERS above.
     """
     messages = conv.get("messages", [])
     if not messages:
         return []
+
+    system_prompt = DECODER_SYSTEM_PROMPTS[prompt_idx % len(DECODER_SYSTEM_PROMPTS)]
+    think_placeholder = DECODER_THINK_PLACEHOLDERS[prompt_idx % len(DECODER_THINK_PLACEHOLDERS)]
 
     inverted_pairs: list[dict] = []
     last_user_text: str | None = None
@@ -88,15 +112,15 @@ def invert_conversation(conv: dict, prompt_idx: int) -> list[dict]:
         split = split_assistant(content)
         if split is None:
             continue
-        thinking, emoji = split
+        _, emoji = split
         if not last_user_text or not emoji:
             continue
         decoder_assistant = (
-            f"<think>{thinking}</think>\n{last_user_text}"
+            f"<think>{think_placeholder}</think>\n{last_user_text}"
         )
         inverted_pairs.append(
             {
-                "system": DECODER_SYSTEM_PROMPTS[prompt_idx % len(DECODER_SYSTEM_PROMPTS)],
+                "system": system_prompt,
                 "messages": [
                     {"role": "user", "content": emoji},
                     {"role": "assistant", "content": decoder_assistant},
@@ -108,6 +132,14 @@ def invert_conversation(conv: dict, prompt_idx: int) -> list[dict]:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Print first 3 inverted pairs and counts; do not push to HF.",
+    )
+    args = parser.parse_args()
+
     print(f"Loading source dataset: {SOURCE_REPO}")
     src = load_dataset(SOURCE_REPO, split="train")
     print(f"Loaded {len(src)} encoder conversations.")
@@ -121,6 +153,24 @@ def main() -> None:
         inverted.extend(invert_conversation(conv, prompt_idx=i))
 
     print(f"Produced {len(inverted)} decoder pairs.")
+
+    if args.dry_run:
+        print("\n=== DRY RUN — first 3 decoder pairs ===")
+        for i, pair in enumerate(inverted[:3]):
+            print(f"\n--- pair {i + 1} ---")
+            print(f"system: {pair['system'][:120]}…")
+            for m in pair["messages"]:
+                content = m["content"]
+                preview = content if len(content) < 400 else content[:400] + "…"
+                print(f"[{m['role']}] {preview}")
+        prompt_counts: dict[str, int] = {}
+        for p in inverted:
+            prompt_counts[p["system"][:40]] = prompt_counts.get(p["system"][:40], 0) + 1
+        print("\nPrompt distribution (first 40 chars → count):")
+        for k, v in prompt_counts.items():
+            print(f"  {v:>4}  {k}…")
+        print(f"\nTotal pairs: {len(inverted)}. Skipping push (dry run).")
+        return
 
     rows = [
         {

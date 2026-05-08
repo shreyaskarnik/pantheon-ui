@@ -15,7 +15,7 @@ export const MODELS = {
 
 export const DEFAULT_MODEL = "lfm2.5";
 
-// Decoder model — completes the autoencoder by mapping emoji back to natural
+// Decoder model — completes the round-trip by mapping emoji back to natural
 // language. Each encoder model has a paired decoder; if a decoder is missing
 // the round-trip toggle is disabled in the UI for that model.
 export const DECODER_MODELS = {

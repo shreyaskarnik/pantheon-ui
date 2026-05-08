@@ -17,13 +17,13 @@ Everything runs in your browser via WebGPU. No server, no API keys. Close the ta
 
 ## Round-Trip Mode (Emoji → Text)
 
-Toggle `🔁 DECODE ON` in the header to engage the second half of the autoencoder. A second small model — the **decoder** — receives the emoji-only output and tries to reconstruct what was originally meant, in natural language. Multiple samples per emoji string surface the lossiness of the channel: same input, three plausible decompressions.
+Toggle `🔁 DECODE ON` in the header to engage the second pass. A small **decoder** model receives the emoji-only output and reconstructs what was originally meant, in natural language. Multiple samples per emoji string surface the lossiness of the channel: same input, three plausible decompressions.
 
-Together the two models form a discrete, human-legible autoencoder where emoji is the bottleneck. The framing is borrowed from Anthropic's [Natural Language Autoencoders](https://www.anthropic.com/research/natural-language-autoencoders) — except here the latent space is a sequence of emoji you can actually read.
+Together the two models form a round-trip translator: text → emoji → text, with emoji as a discrete, human-legible intermediate. Inspired by Anthropic's [Natural Language Autoencoders](https://www.anthropic.com/research/natural-language-autoencoders).
 
 ```
    you say  →  encoder  →  💔😭🫂💕  →  decoder  →  reconstructed text
-   ────────                  bottleneck                ────────────────
+   ────────                  emoji                  ────────────────
 ```
 
 The decoder model is paired with each encoder; if a decoder hasn't been trained for the selected encoder yet, the toggle is disabled.

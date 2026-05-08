@@ -3,12 +3,13 @@
 # ///
 
 """
-Fine-tune the decoder half of the pantheon-ui autoencoder.
+Fine-tune the decoder half of the pantheon-ui round-trip translator.
 
 Encoder: natural language -> emoji (shreyask/pantheon-ui-lfm25-emoji)
 Decoder: emoji -> natural language (this script)
 
-Together: a lossy autoencoder with emoji as the bottleneck.
+Together: text -> emoji -> text, with emoji as a discrete intermediate.
+Inspired by Anthropic's natural-language autoencoders.
 """
 
 from unsloth import FastLanguageModel
@@ -90,16 +91,17 @@ trainer.push_to_hub()
 
 print("=== Merging LoRA adapters into full decoder model ===")
 model.save_pretrained_merged(
-    "merged-decoder-output",
+    "merged-decoder",
     tokenizer,
     save_method="merged_16bit",
 )
 
 from huggingface_hub import HfApi
 api = HfApi(token=os.environ.get("HF_TOKEN"))
+api.create_repo("shreyask/pantheon-ui-decoder-lfm25-merged", exist_ok=True)
 api.upload_folder(
     repo_id="shreyask/pantheon-ui-decoder-lfm25-merged",
-    folder_path="merged-decoder-output",
+    folder_path="merged-decoder",
     commit_message=f"Merged decoder model (6 epochs, loss {trainer.state.best_metric or 'N/A'})",
 )
 print("Merged decoder pushed to shreyask/pantheon-ui-decoder-lfm25-merged")

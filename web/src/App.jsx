@@ -233,7 +233,7 @@ export default function App() {
             className={`toggle-thinking ${roundTrip ? "active" : ""}`}
             disabled={!decoderAvailable}
             title={decoderAvailable
-              ? "Toggle round-trip autoencoder (decode emoji back to text)"
+              ? "Toggle round-trip decode (emoji back to text)"
               : "Decoder model not yet available for this encoder"}
             onClick={() => {
               if (!roundTrip) enableRoundTrip();

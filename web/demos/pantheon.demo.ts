@@ -56,7 +56,7 @@ test('pantheon', async ({ page, narration }) => {
   await page.waitForTimeout(8000);
   await page.waitForTimeout(narration.durationFor('playful', { minMs: 3000, maxMs: 6000 }));
 
-  // ── Scene 6: Toggle the decoder on (round-trip autoencoder) ──
+  // ── Scene 6: Toggle the decoder on (round-trip translator) ──
   narration.mark('decode-toggle');
   await page.click('button:has-text("DECODE OFF")');
 

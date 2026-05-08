@@ -762,7 +762,7 @@ body {
   border-color: var(--accent);
 }
 
-/* ─── Round-trip autoencoder: decoder reconstruction ──────────────────────── */
+/* ─── Round-trip translator: decoder reconstruction ───────────────────────── */
 
 .decoder-status {
   font-family: 'JetBrains Mono', monospace;

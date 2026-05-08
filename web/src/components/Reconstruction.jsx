@@ -1,9 +1,9 @@
 import { useState } from "react";
 
 /**
- * Renders the decoder pass of the autoencoder: the user sees their original
- * input, the emoji bottleneck (above), and one or more lossy reconstructions
- * the decoder model produced from that emoji alone.
+ * Renders the decoder pass of the round-trip: the user sees their original
+ * input, the emoji output (above), and one or more reconstructions the
+ * decoder model produced from that emoji alone.
  *
  * Multiple samples dramatize the lossiness — same input, different
  * plausible decompressions.
