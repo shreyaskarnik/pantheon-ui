@@ -56,8 +56,35 @@ test('pantheon', async ({ page, narration }) => {
   await page.waitForTimeout(8000);
   await page.waitForTimeout(narration.durationFor('playful', { minMs: 3000, maxMs: 6000 }));
 
-  // ── Scene 6: Closing CTA ──
+  // ── Scene 6: Toggle the decoder on (round-trip autoencoder) ──
+  narration.mark('decode-toggle');
+  await page.click('button:has-text("DECODE OFF")');
+
+  // Decoder model loads in a second worker — wait for it to come ready.
+  // Post-effect speeds this up in the final cut.
+  await withOverlay(page, 'decode-toggle', async () => {
+    await page.waitForSelector('button:has-text("DECODE ON")', { timeout: 180_000 });
+    await page.waitForTimeout(1500);
+    await page.waitForTimeout(narration.durationFor('decode-toggle', { minMs: 3000, maxMs: 6000 }));
+  });
+
+  // ── Scene 7: Round-trip — text → emoji → reconstructed text ──
+  narration.mark('round-trip');
+  await demoType(page, '.chat-input', 'I miss you.', 60);
+  await page.waitForTimeout(500);
+  await page.click('.send-button');
+
+  await withOverlay(page, 'round-trip', async () => {
+    await page.waitForSelector('.reconstruction-block', { timeout: 60_000 });
+    // Three samples stream sequentially; give them time to fully populate.
+    await page.waitForSelector('.reconstruction-item.status-complete:nth-child(3)', {
+      timeout: 120_000,
+    }).catch(() => { /* fall through if a sample errors */ });
+    await page.waitForTimeout(narration.durationFor('round-trip', { minMs: 6000, maxMs: 10_000 }));
+  });
+
+  // ── Scene 8: Closing CTA ──
   narration.mark('closing');
-  showConfetti(page, { emoji: ['🧠', '✨', '😊'], spread: 'burst', duration: 3000, pieces: 120 });
+  showConfetti(page, { emoji: ['🧠', '✨', '😊', '🔁'], spread: 'burst', duration: 3000, pieces: 120 });
   await showOverlay(page, 'closing', narration.durationFor('closing', { minMs: 4000, maxMs: 6000 }));
 });

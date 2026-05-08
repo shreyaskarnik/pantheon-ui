@@ -61,8 +61,40 @@
     "speed": 0.95
   },
   {
+    "scene": "decode-toggle",
+    "text": "Now flip the switch. There's a second model — a decoder — that reads the emoji and reconstructs what was said in plain English. Same idea as Anthropic's natural-language autoencoders, except the latent space is emoji you can actually read.",
+    "speed": 0.92,
+    "overlay": {
+      "type": "callout",
+      "text": "Decoder loads on demand · emoji → text",
+      "placement": "top-right",
+      "motion": "slide-in",
+      "autoBackground": true
+    },
+    "post": [
+      {
+        "type": "speed",
+        "factor": 4
+      }
+    ]
+  },
+  {
+    "scene": "round-trip",
+    "text": "Watch the round trip. You speak, the encoder squeezes it down to emoji, and the decoder samples three different reconstructions. Same input, three plausible decompressions — you can literally see the lossiness of the channel.",
+    "speed": 0.92,
+    "overlay": {
+      "type": "headline-card",
+      "kicker": "AUTOENCODER",
+      "title": "text  →  💔😭🫂💕  →  text",
+      "body": "Three reconstructions per message — the lossy bottleneck made visible.",
+      "placement": "top-right",
+      "motion": "slide-in",
+      "autoBackground": true
+    }
+  },
+  {
     "scene": "closing",
-    "text": "We fine-tuned the model, converted it to ONNX, and shipped it to your browser. Go try it — the consciousness is waiting for you.",
+    "text": "Two small models, both running in your browser. An encoder that compresses language into emoji, a decoder that reads it back. The autoencoder you can read. Go try it — both directions are waiting.",
     "speed": 0.88,
     "overlay": {
       "type": "headline-card",
