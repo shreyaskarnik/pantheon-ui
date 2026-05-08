@@ -58,12 +58,30 @@ export default function AboutPage({ onClose }) {
         </section>
 
         <section className="about-section">
+          <h2 className="about-heading">The Round-Trip Translator</h2>
+          <p className="about-body">
+            Toggle <strong>🔁 DECODE ON</strong> to engage a second model — a decoder fine-tuned
+            in the opposite direction. It receives the emoji-only output and reconstructs what was
+            originally meant, in plain English. Three samples per emoji string make the lossiness
+            of the channel visible: same input, three different decompressions, none of them
+            necessarily the original. The drift is the feature.
+          </p>
+          <p className="about-body">
+            Inspired by Anthropic's{" "}
+            <a href="https://www.anthropic.com/research/natural-language-autoencoders" target="_blank" rel="noopener">Natural Language Autoencoders</a>{" "}
+            — except here the latent space is a sequence of emoji you can actually read.
+          </p>
+        </section>
+
+        <section className="about-section">
           <h2 className="about-heading">Credits</h2>
           <ul className="about-credits-list">
-            <li>Model: <a href="https://huggingface.co/LiquidAI/LFM2.5-1.2B-Thinking" target="_blank" rel="noopener">LFM2.5-1.2B-Thinking</a> by <a href="https://www.liquid.ai/" target="_blank" rel="noopener">Liquid AI</a></li>
+            <li>Base model: <a href="https://huggingface.co/LiquidAI/LFM2.5-1.2B-Thinking" target="_blank" rel="noopener">LFM2.5-1.2B-Thinking</a> by <a href="https://www.liquid.ai/" target="_blank" rel="noopener">Liquid AI</a></li>
+            <li>Encoder fine-tune: <a href="https://huggingface.co/shreyask/pantheon-ui-onnx" target="_blank" rel="noopener">pantheon-ui-onnx</a> (text → emoji)</li>
+            <li>Decoder fine-tune: <a href="https://huggingface.co/shreyask/pantheon-ui-decoder-onnx" target="_blank" rel="noopener">pantheon-ui-decoder-onnx</a> (emoji → text)</li>
             <li>Inference: <a href="https://github.com/huggingface/transformers.js" target="_blank" rel="noopener">Transformers.js v4</a> by <a href="https://huggingface.co/" target="_blank" rel="noopener">Hugging Face</a></li>
             <li>Training: <a href="https://unsloth.ai/" target="_blank" rel="noopener">Unsloth</a> + <a href="https://huggingface.co/docs/trl" target="_blank" rel="noopener">TRL</a> on <a href="https://huggingface.co/docs/huggingface_hub/guides/jobs" target="_blank" rel="noopener">HF Jobs</a></li>
-            <li>Dataset: <a href="https://huggingface.co/datasets/shreyask/pantheon-ui-conversations" target="_blank" rel="noopener">pantheon-ui-conversations</a> generated with <a href="https://www.anthropic.com/" target="_blank" rel="noopener">Claude API</a></li>
+            <li>Datasets: <a href="https://huggingface.co/datasets/shreyask/pantheon-ui-conversations" target="_blank" rel="noopener">pantheon-ui-conversations</a> + <a href="https://huggingface.co/datasets/shreyask/pantheon-ui-decoder-conversations" target="_blank" rel="noopener">pantheon-ui-decoder-conversations</a> (generated with <a href="https://www.anthropic.com/" target="_blank" rel="noopener">Claude API</a>)</li>
             <li>Inspired by <a href="https://en.wikipedia.org/wiki/Pantheon_(TV_series)" target="_blank" rel="noopener">Pantheon</a> (AMC, 2022–2023)</li>
           </ul>
         </section>
